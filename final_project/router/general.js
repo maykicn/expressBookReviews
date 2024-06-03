@@ -36,22 +36,34 @@ public_users.get('/', async function (req, res) {
     const booksList = await getBooks();
     res.status(200).json(booksList);
   } catch (error) {
-    res.status(500).json({message: "Error fetching books"});
+    res.status(500).json({message: error.message});
   }
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
+public_users.get('/isbn/:isbn',async function (req, res) {
   const isbn = req.params.isbn;
-  const book = books[isbn]
-  if (book){
+  try {
+    const getBookByISBN = async (isbn) => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const book = books[isbn];
+          if(book){
+            resolve(book);
+          }else{
+            reject(new Error("Book not found"));
+          }
+        }, 1000);
+      });
+    }
+    const book = await getBookByISBN(isbn);
     res.send(JSON.stringify(book,null,2))
-  }else{
-    res.status(404).json({message: "Book not found"})
+  } catch (error) {
+    res.status(404).json({message: error.message})
   }
- });
+});
   
-// Get book details based on author
+  // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   const author = req.params.author;
   let booksOfAuthor = []
