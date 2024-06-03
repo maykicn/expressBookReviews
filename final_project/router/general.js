@@ -64,18 +64,25 @@ public_users.get('/isbn/:isbn',async function (req, res) {
 });
   
   // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
+public_users.get('/author/:author', async function (req, res) {
   const author = req.params.author;
-  let booksOfAuthor = []
-  Object.values(books).forEach(book => {
-    if(book.author == author){
-      booksOfAuthor.push(book)
+  try{
+    const getBookByAuthor = async (author) => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const booksOfAuthor = Object.values(books).filter(book => book.author == author);
+          if (booksOfAuthor.length > 0){
+            resolve(booksOfAuthor);
+          }else{
+            reject(new Error("Book not found belongs author"));
+          }
+        }, 1000);
+      });
     }
-  });
-  if (booksOfAuthor.length > 0){
+    const booksOfAuthor = await getBookByAuthor(author);
     res.status(200).send(JSON.stringify(booksOfAuthor, null, 2));
-  }else{
-    res.status(404).json({message: "Book not found belongs author"})
+  }catch(error){
+    res.status(404).json({message: error.message})
   }
 });
 
